@@ -1,4 +1,8 @@
 # Reusable workflow — lives in edpage-hq/.github/.github/workflows/flutter-test.yml
+# Minimal fallback for standalone Flutter work not based on flutter-starter.
+# flutter-starter ships its own complete CI (codegen, coverage floor, release
+# builds) and does not call this — new Flutter projects should come from
+# flutter-starter and inherit that instead.
 # Called from starter repos via:
 #   uses: edpage-hq/.github/.github/workflows/flutter-test.yml@master
 name: Flutter analyze & test
@@ -8,7 +12,7 @@ on:
     inputs:
       flutter-version:
         type: string
-        default: '3.24.0'
+        default: "3.24.0"
 
 jobs:
   analyze-test:
