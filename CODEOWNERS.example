@@ -1,0 +1,19 @@
+# CODEOWNERS — important: unlike the PR/issue templates, this file does NOT
+# apply org-wide from the .github repo. Copy and adapt this into the root
+# (or .github/) of EACH repository.
+#
+# Syntax: <path pattern>   <@user-or-@org/team>
+# The last matching pattern wins, so keep broad rules first, specific ones after.
+
+# Default owners for everything not matched below
+*                       @edpage-hq/core-devs
+
+# Backend
+/app/                   @edpage-hq/backend
+/database/              @edpage-hq/backend
+
+# Frontend (Inertia pages/components)
+/resources/js/          @edpage-hq/frontend
+
+# CI / infra
+/.github/               @edpage-hq/core-devs

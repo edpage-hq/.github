@@ -1,0 +1,38 @@
+# Reusable workflow — lives in edpage-hq/.github/.github/workflows/node-lint-test.yml
+# Called from starter repos via:
+#   uses: edpage-hq/.github/.github/workflows/node-lint-test.yml@master
+name: Node lint & test
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: '20'
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build --if-present
+
+      - name: Test
+        run: pnpm test --if-present

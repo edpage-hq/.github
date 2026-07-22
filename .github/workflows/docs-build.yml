@@ -1,0 +1,32 @@
+# Reusable workflow — lives in edpage-hq/.github/.github/workflows/docs-build.yml
+# Called from starter repos via:
+#   uses: edpage-hq/.github/.github/workflows/docs-build.yml@master
+name: Docs build check
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: '20'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (fails on broken links/markdown)
+        run: pnpm docs:build

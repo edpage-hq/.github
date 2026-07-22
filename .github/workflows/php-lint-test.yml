@@ -1,0 +1,46 @@
+# Reusable workflow — lives in edpage-hq/.github/.github/workflows/php-lint-test.yml
+# Called from starter repos via:
+#   uses: edpage-hq/.github/.github/workflows/php-lint-test.yml@master
+name: PHP lint & test
+
+on:
+  workflow_call:
+    inputs:
+      php-version:
+        type: string
+        default: '8.3'
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ inputs.php-version }}
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Lint (Pint)
+        run: ./vendor/bin/pint --test
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend assets
+        run: pnpm build
+
+      - name: Test (Pest)
+        run: ./vendor/bin/pest
