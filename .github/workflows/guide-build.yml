@@ -1,14 +1,14 @@
-# Reusable workflow — lives in edpage-hq/.github/.github/workflows/docs-build.yml
+# Reusable workflow — lives in edpage-hq/.github/.github/workflows/guide-build.yml
 # Called from starter repos via:
-#   uses: edpage-hq/.github/.github/workflows/docs-build.yml@master
-name: Docs build check
+#   uses: edpage-hq/.github/.github/workflows/guide-build.yml@master
+name: Guide build check
 
 on:
   workflow_call:
     inputs:
       node-version:
         type: string
-        default: '20'
+        default: "20"
 
 jobs:
   build:

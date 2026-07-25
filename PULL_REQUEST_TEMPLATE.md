@@ -16,4 +16,5 @@ Closes #
 - [ ] Relevant tests were added or updated, and pass
 - [ ] Self-reviewed the diff
 - [ ] Documentation updated if needed (README, comments, ADR)
+- [ ] If this changes business logic, architecture, or the API — `<project>-docs` is updated in this same review
 - [ ] Verified in a staging/local environment
