@@ -2,6 +2,21 @@
 
 This guide applies to every repository in the organization. For the full project canvas (README template, Definition of Done, ADRs...), see [project-guidelines](https://github.com/edpage-hq/project-guidelines).
 
+## Git workflow
+
+edpage-hq projects follow **GitHub Flow**: `master` is the only long-lived
+branch and is always deployable. There's no `develop`, `release`, or
+long-lived environment branch.
+
+1. Branch from `master` (see naming convention below).
+2. Keep branches short-lived — open a PR as soon as there's something
+   reviewable rather than letting a branch accumulate a large diff.
+3. Merge back into `master` via PR once CI is green and approved.
+4. Hotfixes follow the exact same path — branch from `master`, PR, merge.
+   There's no separate hotfix process; urgency is handled through review
+   priority, not by skipping CI or review.
+5. Delete the branch once merged.
+
 ## Branches
 
 - `feature/<short-name>` — new feature
