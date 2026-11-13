@@ -7,8 +7,8 @@ name: Setup PHP (edpage-hq)
 description: >-
   On GitHub-hosted runners, installs PHP with shivammathur/setup-php. On the
   self-hosted Mac runner (`edpage-mac`), puts the Homebrew PHP of the
-  requested version first on the PATH instead: setup-php would reinstall PHP
-  through Homebrew on the host machine.
+  requested version first on the PATH instead (setup-php would reinstall PHP
+  through Homebrew on the host machine), with memory_limit=-1 like setup-php.
 
 inputs:
   php-version:
@@ -45,6 +45,13 @@ runs:
         for dir in "$prefix/opt/php@$WANTED/bin" "$prefix/opt/php/bin"; do
           if [ -x "$dir/php" ] && [ "$("$dir/php" -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')" = "$WANTED" ]; then
             echo "$dir" >> "$GITHUB_PATH"
+            # Same php.ini override as setup-php: Homebrew's default
+            # memory_limit (128M) is too low for PHPStan. The leading ':'
+            # keeps PHP's default scan directory (Homebrew's conf.d).
+            ini_dir="$RUNNER_TEMP/php-ini"
+            mkdir -p "$ini_dir"
+            echo "memory_limit=-1" > "$ini_dir/zz-ci.ini"
+            echo "PHP_INI_SCAN_DIR=:$ini_dir" >> "$GITHUB_ENV"
             "$dir/php" -v | head -1
             if [ "$COVERAGE" != "none" ]; then
               echo "::warning::No $COVERAGE coverage driver on the self-hosted runner"
