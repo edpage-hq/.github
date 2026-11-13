@@ -10,20 +10,26 @@ name: Flutter analyze & test
 on:
   workflow_call:
     inputs:
+      runs-on:
+        description: Runner label. A self-hosted runner uses the tools already installed on it (PHP, Flutter) instead of downloading them.
+        type: string
+        default: ubuntu-latest
       flutter-version:
         type: string
         default: "3.24.0"
 
 jobs:
   analyze-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
+        if: runner.environment == 'github-hosted'
         with:
           flutter-version: ${{ inputs.flutter-version }}
           channel: stable
+          cache: true
 
       - name: Install dependencies
         run: flutter pub get
