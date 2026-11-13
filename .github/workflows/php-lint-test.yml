@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: edpage-hq/.github/actions/setup-php@chore/runner-from-caller-variable
+      - uses: edpage-hq/.github/actions/setup-php@master
         with:
           php-version: ${{ inputs.php-version }}
 
