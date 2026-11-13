@@ -11,25 +11,26 @@ on:
   workflow_call:
     inputs:
       runs-on:
-        description: Runner label. A self-hosted runner uses the tools already installed on it (PHP, Flutter) instead of downloading them.
+        description: >-
+          Runner label. Empty: the caller repository's CI_RUNNER variable
+          (`edpage-mac`, the self-hosted Mac runner), else ubuntu-latest. A
+          self-hosted runner uses the tools already installed on it (PHP,
+          Flutter) instead of downloading them.
         type: string
-        default: ubuntu-latest
+        default: ''
       flutter-version:
         type: string
         default: "3.24.0"
 
 jobs:
   analyze-test:
-    runs-on: ${{ inputs.runs-on }}
+    runs-on: ${{ inputs.runs-on || vars.CI_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
-        if: runner.environment == 'github-hosted'
+      - uses: edpage-hq/.github/actions/setup-flutter@master
         with:
           flutter-version: ${{ inputs.flutter-version }}
-          channel: stable
-          cache: true
 
       - name: Install dependencies
         run: flutter pub get

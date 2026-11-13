@@ -1,0 +1,45 @@
+# Shared action — lives in edpage-hq/.github/actions/setup-flutter
+# Use instead of subosito/flutter-action:
+#   - uses: edpage-hq/.github/actions/setup-flutter@master
+#     with:
+#       flutter-version: '3.47.2'
+name: Setup Flutter (edpage-hq)
+description: >-
+  On GitHub-hosted runners, installs Flutter with subosito/flutter-action
+  (cached). On the self-hosted Mac runner (`edpage-mac`), uses its Flutter
+  SDK — the single version every edpage-hq project builds with — after
+  checking it is the one asked for.
+
+inputs:
+  flutter-version:
+    description: Flutter version (e.g. '3.47.2'). Empty means the latest stable on GitHub-hosted runners and whatever the Mac runner has.
+    default: ''
+  channel:
+    description: Flutter channel.
+    default: stable
+
+runs:
+  using: composite
+  steps:
+    - if: runner.environment == 'github-hosted'
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ inputs.flutter-version }}
+        channel: ${{ inputs.channel }}
+        cache: true
+
+    - if: runner.environment != 'github-hosted'
+      shell: bash
+      env:
+        WANTED: ${{ inputs.flutter-version }}
+      run: |
+        if ! command -v flutter >/dev/null; then
+          echo "::error::Flutter is not on this runner's PATH"
+          exit 1
+        fi
+        actual=$(flutter --version --machine | sed -n 's/.*"frameworkVersion": *"\([^"]*\)".*/\1/p')
+        echo "Flutter $actual"
+        if [ -n "$WANTED" ] && [ "$actual" != "$WANTED" ]; then
+          echo "::error::This runner has Flutter $actual, the workflow needs Flutter $WANTED"
+          exit 1
+        fi

@@ -7,37 +7,26 @@ on:
   workflow_call:
     inputs:
       runs-on:
-        description: Runner label. A self-hosted runner uses the tools already installed on it (PHP, Flutter) instead of downloading them.
+        description: >-
+          Runner label. Empty: the caller repository's CI_RUNNER variable
+          (`edpage-mac`, the self-hosted Mac runner), else ubuntu-latest. A
+          self-hosted runner uses the tools already installed on it (PHP,
+          Flutter) instead of downloading them.
         type: string
-        default: ubuntu-latest
+        default: ''
       php-version:
         type: string
         default: '8.3'
 
 jobs:
   lint-test:
-    runs-on: ${{ inputs.runs-on }}
+    runs-on: ${{ inputs.runs-on || vars.CI_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: shivammathur/setup-php@v2
-        if: runner.environment == 'github-hosted'
+      - uses: edpage-hq/.github/actions/setup-php@chore/runner-from-caller-variable
         with:
           php-version: ${{ inputs.php-version }}
-          coverage: none
-
-      # A self-hosted runner keeps its own PHP: setup-php would reinstall it
-      # through Homebrew on the host machine.
-      - name: Check the runner's PHP version
-        if: runner.environment != 'github-hosted'
-        env:
-          WANTED: ${{ inputs.php-version }}
-        run: |
-          actual=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-          if [ "$actual" != "$WANTED" ]; then
-            echo "This runner has PHP $actual, the workflow needs PHP $WANTED"
-            exit 1
-          fi
 
       - name: Composer cache directory
         id: composer-cache
