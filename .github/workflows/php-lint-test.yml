@@ -30,7 +30,14 @@ jobs:
       # through Homebrew on the host machine.
       - name: Check the runner's PHP version
         if: runner.environment != 'github-hosted'
-        run: php -r 'exit(PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION === "${{ inputs.php-version }}" ? 0 : 1);' || { php -v; echo "This runner needs PHP ${{ inputs.php-version }}"; exit 1; }
+        env:
+          WANTED: ${{ inputs.php-version }}
+        run: |
+          actual=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+          if [ "$actual" != "$WANTED" ]; then
+            echo "This runner has PHP $actual, the workflow needs PHP $WANTED"
+            exit 1
+          fi
 
       - name: Composer cache directory
         id: composer-cache
