@@ -6,20 +6,43 @@ name: PHP lint & test
 on:
   workflow_call:
     inputs:
+      runs-on:
+        description: Runner label. A self-hosted runner uses the tools already installed on it (PHP, Flutter) instead of downloading them.
+        type: string
+        default: ubuntu-latest
       php-version:
         type: string
         default: '8.3'
 
 jobs:
   lint-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: shivammathur/setup-php@v2
+        if: runner.environment == 'github-hosted'
         with:
           php-version: ${{ inputs.php-version }}
           coverage: none
+
+      # A self-hosted runner keeps its own PHP: setup-php would reinstall it
+      # through Homebrew on the host machine.
+      - name: Check the runner's PHP version
+        if: runner.environment != 'github-hosted'
+        run: php -r 'exit(PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION === "${{ inputs.php-version }}" ? 0 : 1);' || { php -v; echo "This runner needs PHP ${{ inputs.php-version }}"; exit 1; }
+
+      - name: Composer cache directory
+        id: composer-cache
+        if: runner.environment == 'github-hosted'
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        if: runner.environment == 'github-hosted'
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress

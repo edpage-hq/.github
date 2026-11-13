@@ -6,13 +6,17 @@ name: Node lint & test
 on:
   workflow_call:
     inputs:
+      runs-on:
+        description: Runner label. A self-hosted runner uses the tools already installed on it (PHP, Flutter) instead of downloading them.
+        type: string
+        default: ubuntu-latest
       node-version:
         type: string
         default: '20'
 
 jobs:
   lint-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     steps:
       - uses: actions/checkout@v4
 
