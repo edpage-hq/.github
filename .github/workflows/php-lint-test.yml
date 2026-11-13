@@ -24,24 +24,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: shivammathur/setup-php@v2
-        if: runner.environment == 'github-hosted'
+      - uses: edpage-hq/.github/actions/setup-php@master
         with:
           php-version: ${{ inputs.php-version }}
-          coverage: none
-
-      # A self-hosted runner keeps its own PHP: setup-php would reinstall it
-      # through Homebrew on the host machine.
-      - name: Check the runner's PHP version
-        if: runner.environment != 'github-hosted'
-        env:
-          WANTED: ${{ inputs.php-version }}
-        run: |
-          actual=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-          if [ "$actual" != "$WANTED" ]; then
-            echo "This runner has PHP $actual, the workflow needs PHP $WANTED"
-            exit 1
-          fi
 
       - name: Composer cache directory
         id: composer-cache
