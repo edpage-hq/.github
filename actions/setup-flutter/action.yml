@@ -8,7 +8,7 @@ description: >-
   On GitHub-hosted runners, installs Flutter with subosito/flutter-action
   (cached). On the self-hosted Mac runner (`edpage-mac`), uses its Flutter
   SDK — the single version every edpage-hq project builds with — after
-  checking it is the one asked for.
+  checking it is the one asked for, with Apple's rsync first on the PATH.
 
 inputs:
   flutter-version:
@@ -43,3 +43,17 @@ runs:
           echo "::error::This runner has Flutter $actual, the workflow needs Flutter $WANTED"
           exit 1
         fi
+
+    # The Mac has Homebrew rsync 3.5 first on its PATH (the deploy workflows
+    # need it). Flutter copies Swift Package Manager plugins with
+    # `rsync <plugin>/ build/ios/SourcePackages/<plugin>` without creating
+    # build/ios/SourcePackages first: Apple's rsync creates the missing
+    # parents, rsync 3.5 fails ("mkdir ... No such file or directory") and
+    # `flutter pub get` stops. Flutter jobs get Apple's rsync back.
+    - if: runner.environment != 'github-hosted' && runner.os == 'macOS'
+      shell: bash
+      run: |
+        dir="$RUNNER_TEMP/apple-rsync"
+        mkdir -p "$dir"
+        ln -sf /usr/bin/rsync "$dir/rsync"
+        echo "$dir" >> "$GITHUB_PATH"
